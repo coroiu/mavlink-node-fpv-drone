@@ -28,12 +28,18 @@ mav.on("ready", function() {
   port.on('data', function(data) {
     mav.parse(data);
   });
+
+  mav.on('ATTITUDE', function(message, fields) {
+    serverLink.send({
+      type: 'ATTITUDE',
+      fields: fields
+    });
+  });
   
   mav.on('VFR_HUD', function(message, fields) {
     serverLink.send({
       type: 'VFR_HUD',
       fields: fields
     });
-    //console.log(fields);
   });
 });
