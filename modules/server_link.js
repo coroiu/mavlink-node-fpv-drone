@@ -1,14 +1,16 @@
 const net = require('net');
 
 class ServerLink {
-  constructor() {
+  constructor(port, address) {
     this.connected = false;
+    this.port = port;
+    this.address = address;
     this._connect();
   }
 
   _connect() {
     this.socket = new net.Socket();
-    this.socket.connect(7800, '127.0.0.1', () => {
+    this.socket.connect(this.port, this.address, () => {
       //this.socket.write('Hello, server! Love, Client.');
       this.connected = true;
       console.log('Server connection established.');
@@ -29,11 +31,15 @@ class ServerLink {
     })
   }
 
-  send(data) {
+  send(data, persistent) {
     if (this.connected) {
       this.socket.write(JSON.stringify(data) + '\n');
+    } else if (!this.connected && persistent) {
+      setTimeout(() => {
+        this.send(data, false);
+      }, 1000);
     }
   }
 }
 
-module.exports = new ServerLink();
+module.exports = ServerLink;

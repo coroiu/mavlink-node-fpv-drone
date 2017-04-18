@@ -1,11 +1,28 @@
 const mavlink = require('mavlink');
 const mav = new mavlink(1,1,"v1.0",["common", "ardupilotmega"]);
 
-const serverLink = require('./modules/server_link');
-
 const SerialPort = require('serialport');
+const ServerLink = require('./modules/server_link');
+const StunClient = require('./modules/stun_client');
+
+const serverAddress = '127.0.0.1';
+
+const serverLink = new ServerLink(7800, serverAddress);
 
 let port = null;
+
+function sendStunInfo(type) {
+  return (info) => {
+    serverLink.send({
+      type: type,
+      port: info.port,
+      address: info.address
+    });
+  }
+}
+
+new StunClient(7801, serverAddress).on('info', sendStunInfo('info.videoPath'));
+new StunClient(7802, serverAddress).on('info', sendStunInfo('info.serialPath'));
 
 function connectSerial() {
   port = new SerialPort('/dev/ttyACM0', {
